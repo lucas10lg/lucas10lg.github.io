@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundos Conectados</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Configuración básica de Three.js
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Añadir luz a la escena
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(1, 1, 1).normalize();
+        scene.add(light);
+
+        // Posicionar la cámara
+        camera.position.z = 5;
+
+        let objects = [];
+        const maxObjects = 100;
+        let isAdding = true;
+
+        // Función para crear un cubo 3D
+        function createCube() {
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
+            const cube = new THREE.Mesh(geometry, material);
+
+            cube.position.x = (Math.random() - 0.5) * 10;
+            cube.position.y = (Math.random() - 0.5) * 10;
+            cube.position.z = (Math.random() - 0.5) * 10;
+
+            scene.add(cube);
+            objects.push(cube);
+        }
+
+        // Función para eliminar un cubo 3D
+        function removeCube() {
+            if (objects.length > 0) {
+                const cube = objects.pop();
+                scene.remove(cube);
+                cube.geometry.dispose();
+                cube.material.dispose();
+            }
+        }
+
+        // Controlar el ciclo de creación y eliminación
+        function controlCycle() {
+            if (isAdding) {
+                if (objects.length < maxObjects) {
+                    createCube();
+                } else {
+                    isAdding = false;
+                }
+            } else {
+                if (objects.length > 1) {
+                    removeCube();
+                } else {
+                    isAdding = true;
+                }
+            }
+        }
+
+        // Intervalo de tiempo para crear y eliminar objetos
+        setInterval(controlCycle, 5000);
+
+        // Función de animación
+        function animate() {
+            requestAnimationFrame(animate);
+
+            scene.rotation.x += 0.005;
+            scene.rotation.y += 0.005;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Ajustar la ventana al cambiar el tamaño
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
